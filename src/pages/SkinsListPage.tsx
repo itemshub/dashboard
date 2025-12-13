@@ -29,23 +29,17 @@ const SkinsListPage: React.FC = () => {
   const [stats, setStats] = useState<any>({});
   const [filteredAndSortedSkins , setFilteredAndSortedSkins]= useState<any>([]);
   useEffect(() => {
+    if(!stats?.lastUpdate)
+    {
       loadPageData();
-  }, []);
-  
-  // 计算每个饰品的最大利差
-  const calculateMaxSpread = (skin: Skin): number => {
-    const prices = Object.values(skin.prices);
-    let maxSpread = 0;
-    
-    for (let i = 0; i < prices.length; i++) {
-      for (let j = i + 1; j < prices.length; j++) {
-        const spread = ((prices[j].sell - prices[i].buy) / prices[i].buy) * 100;
-        maxSpread = Math.max(maxSpread, spread);
-      }
+    }else{
+      setFilteredAndSortedSkins(setData(skins))
     }
-    
-    return maxSpread;
-  };
+
+  }, [
+    searchTerm, filterRarity, sortBy, sortOrder
+  ]);
+  
   const loadPageData = async ()=>
   {
       const datas = await dashboard_data();
@@ -104,16 +98,16 @@ const SkinsListPage: React.FC = () => {
     });
     return filtered as SkinWithSpread[];
   }
-if (!stats?.lastUpdate) {
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-transparent">
-      <div
-        className="h-12 w-12 rounded-full border-4 border-white/20 border-t-white animate-spin"
-        aria-label="Loading"
-      />
-    </div>
-  );
-}
+  if (!stats?.lastUpdate) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-transparent">
+        <div
+          className="h-12 w-12 rounded-full border-4 border-white/20 border-t-white animate-spin"
+          aria-label="Loading"
+        />
+      </div>
+    );
+  }
 
 
   // 过滤和排序饰品

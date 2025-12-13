@@ -23,6 +23,7 @@ export const dashboard_data =async () =>
         {
             let allPairs = [];
             let profitAble = [];
+            let profitAbleMaker = [];
             let profitablePairs_5 = [];
             let profitablePairs_10 = [];
             let profitablePairs_20 = [];
@@ -45,7 +46,40 @@ export const dashboard_data =async () =>
                     allPairs.push(u);
                     if(u?.rate>cfg.profiteRate)
                     {
-                        profitAble.push(u)
+                        profitAble.push({
+                            id: `${i.skin.id}__${u.from}__${u.to}`,
+                            skinId: i.skin.id,
+                            skinName: i.skin.name,
+                            skinImage: i.skin.img_url,
+                            buyExchange: String(u.from).toUpperCase(),
+                            buyPrice:i.raw.data[u.from].maker,
+                            sellExchange: String(u.to).toUpperCase(),
+                            sellPrice:i.raw.data[u.to].maker,
+                            profit:u.sub,
+                            profitPercentage:u.rate*100,
+                            type: '现货->挂单',
+                            riskLevel: u.rate*100 > 10 ? 'low' : u.rate*100 > 5 ? 'medium' : 'high',
+                            timestamp: (new Date(i.raw.timestamp)).toLocaleString()
+                        })
+                    }
+
+                    if(u?.market_rate>cfg.profiteRate)
+                    {
+                        profitAble.push({
+                            id: `${i.skin.id}__${u.from}__${u.to}`,
+                            skinId: i.skin.id,
+                            skinName: i.skin.name,
+                            skinImage: i.skin.img_url,
+                            buyExchange: String(u.from).toUpperCase(),
+                            buyPrice:i.raw.data[u.from].maker,
+                            sellExchange: String(u.to).toUpperCase(),
+                            sellPrice:i.raw.data[u.to].maker,
+                            profit:u.sub,
+                            profitPercentage:u.market_rate*100,
+                            type: '现货->挂单',
+                            riskLevel: u.market_rate*100 > 10 ? 'low' : u.market_rate*100 > 5 ? 'medium' : 'high',
+                            timestamp: (new Date(i.raw.timestamp)).toLocaleString()
+                        })
                     }
                     if(u?.rate>0.05)
                     {
@@ -93,6 +127,7 @@ export const dashboard_data =async () =>
             }
             avgSpread = avgSpread*100/allPairs.length;
             maxSpread = maxSpread*100
+
             return {
                 avgSpread: avgSpread.toFixed(2),
                 maxSpread: maxSpread.toFixed(2),
@@ -106,6 +141,8 @@ export const dashboard_data =async () =>
                     profitablePairs_10,
                     profitablePairs_20,
                     profitablePairs_30,
+                    profitAble,
+                    profitAbleMaker,
                     allPairs,
                     skins,
                     markets

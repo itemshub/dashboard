@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, Table, TableHeader, TableBody, TableCell, Badge, Button, Container } from '../components/ui';
 import { mockArbitrageOpportunities, ArbitrageOpportunity } from '../data/mockData';
 import { 
@@ -12,6 +12,7 @@ import {
   Target,
   DollarSign
 } from 'lucide-react';
+import { dashboard_data } from '@/data/request';
 
 const ListingArbitragePage: React.FC = () => {
   const [minProfit, setMinProfit] = useState(0);
@@ -19,22 +20,71 @@ const ListingArbitragePage: React.FC = () => {
   const [sortBy, setSortBy] = useState<'profit' | 'profitPercentage'>('profitPercentage');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
+    const [skins, setSkins] = useState<any>({});
+    const [markets, setMarkets] = useState<any>([]);
+    const [stats, setStats] = useState<any>({});
+    const [filteredOpportunities , setFilteredOpportunities]= useState<any>([]);
+    useEffect(() => {
+        if (!stats?.lastUpdate) {
+          loadPageData();
+        }else{
+          setFilteredOpportunities(setData(stats.raw.profitAble))
+        }
+    }, [minProfit, maxProfit, sortBy, sortOrder]);
+    const loadPageData = async ()=>
+    {
+        const datas = await dashboard_data();
+        console.log(datas)
+        setSkins(datas.raw.skins)
+        setMarkets(datas.raw.markets)
+        setStats(datas)
+        setFilteredOpportunities(setData(datas.raw.profitAble))
+    }
+  
+    const setData = (skins:any) =>
+    {
+      return skins
+        // .filter(opp => opp.type === 'listing')
+        .filter(opp => {
+          const meetsMin = opp.profitPercentage >= minProfit;
+          const meetsMax = opp.profitPercentage <= maxProfit;
+          return meetsMin && meetsMax;
+        })
+        .sort((a, b) => {
+          const aValue = sortBy === 'profit' ? a.profit : a.profitPercentage;
+          const bValue = sortBy === 'profit' ? b.profit : b.profitPercentage;
+          
+          return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+        });
+    }
+  if (!stats?.lastUpdate) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-transparent">
+        <div
+          className="h-12 w-12 rounded-full border-4 border-white/20 border-t-white animate-spin"
+          aria-label="Loading"
+        />
+      </div>
+    );
+  }
+  
+
   // 过滤挂单套利机会
-  const filteredOpportunities = useMemo(() => {
-    return mockArbitrageOpportunities
-      .filter(opp => opp.type === 'listing')
-      .filter(opp => {
-        const meetsMin = opp.profitPercentage >= minProfit;
-        const meetsMax = opp.profitPercentage <= maxProfit;
-        return meetsMin && meetsMax;
-      })
-      .sort((a, b) => {
-        const aValue = sortBy === 'profit' ? a.profit : a.profitPercentage;
-        const bValue = sortBy === 'profit' ? b.profit : b.profitPercentage;
+  // const filteredOpportunities = useMemo(() => {
+  //   return mockArbitrageOpportunities
+  //     .filter(opp => opp.type === 'listing')
+  //     .filter(opp => {
+  //       const meetsMin = opp.profitPercentage >= minProfit;
+  //       const meetsMax = opp.profitPercentage <= maxProfit;
+  //       return meetsMin && meetsMax;
+  //     })
+  //     .sort((a, b) => {
+  //       const aValue = sortBy === 'profit' ? a.profit : a.profitPercentage;
+  //       const bValue = sortBy === 'profit' ? b.profit : b.profitPercentage;
         
-        return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
-      });
-  }, [minProfit, maxProfit, sortBy, sortOrder]);
+  //       return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+  //     });
+  // }, [minProfit, maxProfit, sortBy, sortOrder]);
 
   const formatPrice = (price: number) => {
     return `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -200,8 +250,8 @@ const ListingArbitragePage: React.FC = () => {
               <TableCell className="font-semibold text-secondary">操作</TableCell>
             </TableHeader>
             <TableBody>
-              {filteredOpportunities.map((opportunity) => (
-                <tr key={opportunity.id} className="hover:bg-tertiary/20 transition-colors">
+              {filteredOpportunities.map((opportunity,index) => (
+                <tr key={opportunity.id+String(index)} className="hover:bg-tertiary/20 transition-colors">
                   <TableCell>
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 bg-tertiary rounded-neumorphic-sm flex items-center justify-center">
