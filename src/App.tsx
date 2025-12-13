@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 // 页面组件
@@ -15,15 +15,30 @@ import BalancePage from './pages/BalancePage';
 import MainLayout from './components/layout/MainLayout';
 
 // 受保护的路由组件
+
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  
-  if (!isAuthenticated) {
+  const location = useLocation();
+
+  const authDenyList = [
+    'my-arbitrage',
+    'balance',
+  ];
+
+  // 判断当前路径是否命中 deny list
+  const isDenied = authDenyList.some((path) =>
+    location.pathname.includes(path)
+  );
+
+  // 在 deny list 中且未登录 → 跳转登录
+  if (isDenied && !isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
+  // 否则正常访问
   return <>{children}</>;
 };
+
 
 // 公共路由组件
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {

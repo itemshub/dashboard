@@ -30,6 +30,15 @@ const MainLayout: React.FC = () => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const authDenyList = [
+    'my-arbitrage',
+    'balance',
+  ];
+  // 判断当前路径是否命中 deny list
+  const isDenied = authDenyList.some((path) =>
+    location.pathname.includes(path)
+  );
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -77,7 +86,11 @@ const MainLayout: React.FC = () => {
           </nav>
 
           {/* 退出按钮 */}
-          <div className="p-4 border-t border-tertiary/30">
+          <div className="p-4 border-t border-tertiary/30" style={
+            {
+              display:isDenied?"":"none"
+            }
+          }>
             <button
               onClick={handleLogout}
               className="flex items-center space-x-3 w-full px-4 py-3 rounded-neumorphic text-secondary hover:text-error hover:bg-error/10 transition-all duration-200"
