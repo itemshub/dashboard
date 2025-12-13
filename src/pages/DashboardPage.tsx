@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, StatCard, Badge, Container } from '../components/ui';
 import { 
   TrendingUp, 
@@ -11,10 +11,21 @@ import {
   Clock
 } from 'lucide-react';
 import { calculateDashboardStats } from '../data/mockData';
+import { dashboard_data } from '@/data/request';
 
 const DashboardPage: React.FC = () => {
-  const stats = calculateDashboardStats();
+  // const stats = calculateDashboardStats();
+  const [stats, setStats] = useState<any>({});
+  useEffect(() => {
+    loadPageData();
+  }, []);
 
+  const loadPageData = async ()=>
+  {
+    const datas = await dashboard_data();
+    console.log(datas)
+    setStats(datas)
+  }
   const formatCurrency = (value: number) => {
     return `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
@@ -29,6 +40,17 @@ const DashboardPage: React.FC = () => {
       second: '2-digit'
     });
   };
+if (!stats?.lastUpdate) {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-transparent">
+      <div
+        className="h-12 w-12 rounded-full border-4 border-white/20 border-t-white animate-spin"
+        aria-label="Loading"
+      />
+    </div>
+  );
+}
+
 
   return (
     <div className="space-y-8">
@@ -92,7 +114,7 @@ const DashboardPage: React.FC = () => {
                 <div className="w-3 h-3 bg-success rounded-full"></div>
                 <span className="text-secondary">5%以上利差饰品</span>
               </div>
-              <Badge variant="success" size="md">{stats.profitableItems5} 个</Badge>
+              <Badge variant="success" size="md">{stats.profitablePairs5} 个</Badge>
             </div>
             
             <div className="flex justify-between items-center p-4 bg-tertiary/20 rounded-neumorphic-sm">
@@ -100,23 +122,23 @@ const DashboardPage: React.FC = () => {
                 <div className="w-3 h-3 bg-warning rounded-full"></div>
                 <span className="text-secondary">10%以上利差饰品</span>
               </div>
-              <Badge variant="warning" size="md">{stats.profitableItems10} 个</Badge>
+              <Badge variant="warning" size="md">{stats.profitablePairs10} 个</Badge>
             </div>
             
             <div className="flex justify-between items-center p-4 bg-tertiary/20 rounded-neumorphic-sm">
               <div className="flex items-center space-x-3">
                 <div className="w-3 h-3 bg-accent rounded-full"></div>
-                <span className="text-secondary">5%以上利差套利对</span>
+                <span className="text-secondary">20%以上利差套利对</span>
               </div>
-              <Badge variant="accent" size="md">{stats.profitablePairs5} 个</Badge>
+              <Badge variant="accent" size="md">{stats.profitablePairs20} 个</Badge>
             </div>
             
             <div className="flex justify-between items-center p-4 bg-tertiary/20 rounded-neumorphic-sm">
               <div className="flex items-center space-x-3">
                 <div className="w-3 h-3 bg-error rounded-full"></div>
-                <span className="text-secondary">10%以上利差套利对</span>
+                <span className="text-secondary">30%以上利差套利对</span>
               </div>
-              <Badge variant="error" size="md">{stats.profitablePairs10} 个</Badge>
+              <Badge variant="error" size="md">{stats.profitablePairs30} 个</Badge>
             </div>
           </div>
         </Card>

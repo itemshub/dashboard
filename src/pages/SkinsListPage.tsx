@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, Table, TableHeader, TableBody, TableCell, Badge, Button, Container } from '../components/ui';
-import { mockSkins, Skin } from '../data/mockData';
+import { Skin } from '../data/mockData';
 
 // 扩展Skin类型以包含maxSpread
 interface SkinWithSpread extends Skin {
@@ -17,13 +17,21 @@ import {
   Award,
   Zap
 } from 'lucide-react';
+import { dashboard_data } from '@/data/request';
 
 const SkinsListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'rarity' | 'maxSpread'>('maxSpread');
   const [filterRarity, setFilterRarity] = useState<string>('all');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-
+  const [skins, setSkins] = useState<any>({});
+  const [markets, setMarkets] = useState<any>([]);
+  const [stats, setStats] = useState<any>({});
+  const [filteredAndSortedSkins , setFilteredAndSortedSkins]= useState<any>([]);
+  useEffect(() => {
+      loadPageData();
+  }, []);
+  
   // 计算每个饰品的最大利差
   const calculateMaxSpread = (skin: Skin): number => {
     const prices = Object.values(skin.prices);
@@ -38,10 +46,19 @@ const SkinsListPage: React.FC = () => {
     
     return maxSpread;
   };
+  const loadPageData = async ()=>
+  {
+      const datas = await dashboard_data();
+      console.log(datas)
+      setSkins(datas.raw.skins)
+      setMarkets(datas.raw.markets)
+      setStats(datas)
+      setFilteredAndSortedSkins(setData(datas.raw.skins))
+  }
 
-  // 过滤和排序饰品
-  const filteredAndSortedSkins = useMemo((): SkinWithSpread[] => {
-    let filtered = mockSkins.filter(skin => {
+  const setData = (skins:any) =>
+  {
+    let filtered = skins.filter(skin => {
       const matchesSearch = skin.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            skin.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesRarity = filterRarity === 'all' || skin.rarity === filterRarity;
@@ -51,7 +68,7 @@ const SkinsListPage: React.FC = () => {
     // 计算最大利差并添加到对象中
     filtered = filtered.map(skin => ({
       ...skin,
-      maxSpread: calculateMaxSpread(skin)
+      maxSpread: skin.maxSpread
     })) as SkinWithSpread[];
 
     // 排序
@@ -85,9 +102,69 @@ const SkinsListPage: React.FC = () => {
           : (bValue as number) - (aValue as number);
       }
     });
-
     return filtered as SkinWithSpread[];
-  }, [searchTerm, filterRarity, sortBy, sortOrder]);
+  }
+if (!stats?.lastUpdate) {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-transparent">
+      <div
+        className="h-12 w-12 rounded-full border-4 border-white/20 border-t-white animate-spin"
+        aria-label="Loading"
+      />
+    </div>
+  );
+}
+
+
+  // 过滤和排序饰品
+  // const filteredAndSortedSkins = useMemo((): SkinWithSpread[] => {
+  //   let filtered = skins.filter(skin => {
+  //     const matchesSearch = skin.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //                          skin.name.toLowerCase().includes(searchTerm.toLowerCase());
+  //     const matchesRarity = filterRarity === 'all' || skin.rarity === filterRarity;
+  //     return matchesSearch && matchesRarity;
+  //   });
+
+  //   // 计算最大利差并添加到对象中
+  //   filtered = filtered.map(skin => ({
+  //     ...skin,
+  //     maxSpread: calculateMaxSpread(skin)
+  //   })) as SkinWithSpread[];
+
+  //   // 排序
+  //   filtered.sort((a: SkinWithSpread, b: SkinWithSpread) => {
+  //     let aValue, bValue;
+      
+  //     switch (sortBy) {
+  //       case 'name':
+  //         aValue = a.displayName;
+  //         bValue = b.displayName;
+  //         break;
+  //       case 'rarity':
+  //         aValue = a.rarity;
+  //         bValue = b.rarity;
+  //         break;
+  //       case 'maxSpread':
+  //         aValue = a.maxSpread;
+  //         bValue = b.maxSpread;
+  //         break;
+  //       default:
+  //         return 0;
+  //     }
+
+  //     if (typeof aValue === 'string') {
+  //       return sortOrder === 'asc' 
+  //         ? aValue.localeCompare(bValue as string)
+  //         : (bValue as string).localeCompare(aValue);
+  //     } else {
+  //       return sortOrder === 'asc' 
+  //         ? (aValue as number) - (bValue as number)
+  //         : (bValue as number) - (aValue as number);
+  //     }
+  //   });
+
+  //   return filtered as SkinWithSpread[];
+  // }, [searchTerm, filterRarity, sortBy, sortOrder]);
 
   const formatPrice = (price: number) => {
     return `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -115,7 +192,7 @@ const SkinsListPage: React.FC = () => {
     }
   };
 
-  const uniqueRarities = [...new Set(mockSkins.map(skin => skin.rarity))];
+  const uniqueRarities = [...new Set(skins.map(skin => skin.rarity))];
 
   return (
     <div className="space-y-6">
@@ -141,7 +218,7 @@ const SkinsListPage: React.FC = () => {
           </div>
 
           {/* 稀有度过滤 */}
-          <select
+          {/* <select
             value={filterRarity}
             onChange={(e) => setFilterRarity(e.target.value)}
             className="neumorphic-input px-4 py-3"
@@ -150,7 +227,7 @@ const SkinsListPage: React.FC = () => {
             {uniqueRarities.map(rarity => (
               <option key={rarity} value={rarity}>{rarity}</option>
             ))}
-          </select>
+          </select> */}
 
           {/* 排序方式 */}
           <select
@@ -160,7 +237,7 @@ const SkinsListPage: React.FC = () => {
           >
             <option value="maxSpread">按利差排序</option>
             <option value="name">按名称排序</option>
-            <option value="rarity">按稀有度排序</option>
+            {/* <option value="rarity">按稀有度排序</option> */}
           </select>
 
           {/* 排序顺序 */}
@@ -211,13 +288,16 @@ const SkinsListPage: React.FC = () => {
           <Table>
             <TableHeader>
               <TableCell className="font-semibold text-secondary">饰品信息</TableCell>
-              <TableCell className="font-semibold text-secondary">稀有度</TableCell>
-              <TableCell className="font-semibold text-secondary">Steam</TableCell>
+              {/* <TableCell className="font-semibold text-secondary">稀有度</TableCell> */}
+              {markets.map((mk:any) => (
+                <TableCell className="font-semibold text-secondary">{mk.name}</TableCell>
+              ))}
+              {/* <TableCell className="font-semibold text-secondary">Steam</TableCell>
               <TableCell className="font-semibold text-secondary">CS.MONEY</TableCell>
               <TableCell className="font-semibold text-secondary">BUFF163</TableCell>
-              <TableCell className="font-semibold text-secondary">C5Game</TableCell>
+              <TableCell className="font-semibold text-secondary">C5Game</TableCell> */}
               <TableCell className="font-semibold text-secondary">最大利差</TableCell>
-              <TableCell className="font-semibold text-secondary">操作</TableCell>
+              {/* <TableCell className="font-semibold text-secondary">操作</TableCell> */}
             </TableHeader>
             <TableBody>
               {filteredAndSortedSkins.map((skin) => (
@@ -225,7 +305,8 @@ const SkinsListPage: React.FC = () => {
                   <TableCell>
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 bg-tertiary rounded-neumorphic-sm flex items-center justify-center">
-                        <Eye size={20} className="text-muted" />
+                        {/* <Eye size={20} className="text-muted" /> */}
+                        <img src={skin.imageUrl} style={{maxWidth:"50px",maxHeight:"50px"}} />
                       </div>
                       <div>
                         <div className="font-medium text-primary">{skin.displayName}</div>
@@ -235,7 +316,7 @@ const SkinsListPage: React.FC = () => {
                     </div>
                   </TableCell>
                   
-                  <TableCell>
+                  {/* <TableCell>
                     <Badge 
                       variant={getRarityColor(skin.rarity) as any}
                       size="sm"
@@ -244,8 +325,8 @@ const SkinsListPage: React.FC = () => {
                       {getRarityIcon(skin.rarity)}
                       <span>{skin.rarity}</span>
                     </Badge>
-                  </TableCell>
-                  
+                  </TableCell> */}
+{/*                   
                   <TableCell>
                     <div className="space-y-1">
                       <div className="text-success font-medium">
@@ -289,7 +370,21 @@ const SkinsListPage: React.FC = () => {
                       </div>
                     </div>
                   </TableCell>
-                  
+                   */}
+
+                  {markets.map((mk:any) => (
+                    <TableCell>
+                      <div className="space-y-1">
+                        <div className="text-success font-medium">
+                          {formatPrice(skin.prices[mk.market_id]?.maker?skin.prices[mk.market_id]?.maker:0)}
+                        </div>
+                        <div className="text-error text-sm">
+                          {formatPrice(skin.prices[mk.market_id]?.taker?skin.prices[mk.market_id]?.taker:0)}
+                        </div>
+                      </div>
+                    </TableCell>
+                  ))}
+
                   <TableCell>
                     <div className="flex items-center space-x-2">
                       <span className={`font-bold ${skin.maxSpread > 10 ? 'text-success' : skin.maxSpread > 5 ? 'text-warning' : 'text-secondary'}`}>
@@ -299,11 +394,11 @@ const SkinsListPage: React.FC = () => {
                     </div>
                   </TableCell>
                   
-                  <TableCell>
+                  {/* <TableCell>
                     <Button variant="ghost" size="sm">
                       查看详情
                     </Button>
-                  </TableCell>
+                  </TableCell> */}
                 </tr>
               ))}
             </TableBody>
