@@ -65,7 +65,7 @@ export const dashboard_data =async () =>
 
                     if(u?.market_rate>cfg.profiteRate)
                     {
-                        profitAble.push({
+                        profitAbleMaker.push({
                             id: `${i.skin.id}__${u.from}__${u.to}`,
                             skinId: i.skin.id,
                             skinName: i.skin.name,

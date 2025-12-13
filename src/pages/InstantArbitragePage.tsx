@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, Table, TableHeader, TableBody, TableCell, Badge, Button, Container } from '../components/ui';
 import { mockArbitrageOpportunities, ArbitrageOpportunity } from '../data/mockData';
 import { 
@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   CheckCircle
 } from 'lucide-react';
+import { dashboard_data } from '@/data/request';
 
 const InstantArbitragePage: React.FC = () => {
   const [minProfit, setMinProfit] = useState(0);
@@ -21,10 +22,31 @@ const InstantArbitragePage: React.FC = () => {
   const [sortBy, setSortBy] = useState<'profit' | 'profitPercentage'>('profitPercentage');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  // 过滤吃单套利机会
-  const filteredOpportunities = useMemo(() => {
-    return mockArbitrageOpportunities
-      .filter(opp => opp.type === 'instant')
+  const [skins, setSkins] = useState<any>({});
+  const [markets, setMarkets] = useState<any>([]);
+  const [stats, setStats] = useState<any>({});
+  const [filteredOpportunities , setFilteredOpportunities]= useState<any>([]);
+  useEffect(() => {
+      if (!stats?.lastUpdate) {
+        loadPageData();
+      }else{
+        setFilteredOpportunities(setData(stats.raw.profitAbleMaker))
+      }
+  }, [minProfit, maxProfit, sortBy, sortOrder]);
+  const loadPageData = async ()=>
+  {
+      const datas = await dashboard_data();
+      console.log(datas)
+      setSkins(datas.raw.skins)
+      setMarkets(datas.raw.markets)
+      setStats(datas)
+      setFilteredOpportunities(setData(datas.raw.profitAbleMaker))
+  }
+
+  const setData = (skins:any) =>
+  {
+    return skins
+      // .filter(opp => opp.type === 'listing')
       .filter(opp => {
         const meetsMin = opp.profitPercentage >= minProfit;
         const meetsMax = opp.profitPercentage <= maxProfit;
@@ -36,7 +58,36 @@ const InstantArbitragePage: React.FC = () => {
         
         return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
       });
-  }, [minProfit, maxProfit, sortBy, sortOrder]);
+  }
+    if (!stats?.lastUpdate) {
+      return (
+        <div className="fixed inset-0 flex items-center justify-center bg-transparent">
+          <div
+            className="h-12 w-12 rounded-full border-4 border-white/20 border-t-white animate-spin"
+            aria-label="Loading"
+          />
+        </div>
+      );
+    }
+    
+  
+
+  // 过滤吃单套利机会
+  // const filteredOpportunities = useMemo(() => {
+  //   return mockArbitrageOpportunities
+  //     .filter(opp => opp.type === 'instant')
+  //     .filter(opp => {
+  //       const meetsMin = opp.profitPercentage >= minProfit;
+  //       const meetsMax = opp.profitPercentage <= maxProfit;
+  //       return meetsMin && meetsMax;
+  //     })
+  //     .sort((a, b) => {
+  //       const aValue = sortBy === 'profit' ? a.profit : a.profitPercentage;
+  //       const bValue = sortBy === 'profit' ? b.profit : b.profitPercentage;
+        
+  //       return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
+  //     });
+  // }, [minProfit, maxProfit, sortBy, sortOrder]);
 
   const formatPrice = (price: number) => {
     return `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
