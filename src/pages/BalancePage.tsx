@@ -53,39 +53,44 @@ const BalancePage: React.FC = () => {
     return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  const getExchangeIcon = (exchangeName: string) => {
-    switch (exchangeName) {
-      case 'Steam':
-        return (
-          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
-            <span className="text-white text-xs font-bold">S</span>
-          </div>
-        );
-      case 'CS.MONEY':
-        return (
-          <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center">
-            <span className="text-white text-xs font-bold">C</span>
-          </div>
-        );
-      case 'BUFF163':
-        return (
-          <div className="w-8 h-8 bg-green-600 rounded flex items-center justify-center">
-            <span className="text-white text-xs font-bold">B</span>
-          </div>
-        );
-      case 'C5Game':
-        return (
-          <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center">
-            <span className="text-white text-xs font-bold">C5</span>
-          </div>
-        );
-      default:
-        return (
-          <div className="w-8 h-8 bg-tertiary rounded flex items-center justify-center">
-            <Wallet size={16} className="text-muted" />
-          </div>
-        );
-    }
+  const getExchangeIcon = (img_url: string) => {
+      return (
+        <div className="w-8 h-8 bg-tertiary rounded flex items-center justify-center">
+          <img src={img_url}  style={{width:"30px",height:"30px"}}/>
+        </div>
+      );
+    // switch (exchangeName) {
+    //   case 'Steam':
+    //     return (
+    //       <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
+    //         <span className="text-white text-xs font-bold">S</span>
+    //       </div>
+    //     );
+    //   case 'CS.MONEY':
+    //     return (
+    //       <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center">
+    //         <span className="text-white text-xs font-bold">C</span>
+    //       </div>
+    //     );
+    //   case 'BUFF163':
+    //     return (
+    //       <div className="w-8 h-8 bg-green-600 rounded flex items-center justify-center">
+    //         <span className="text-white text-xs font-bold">B</span>
+    //       </div>
+    //     );
+    //   case 'C5Game':
+    //     return (
+    //       <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center">
+    //         <span className="text-white text-xs font-bold">C5</span>
+    //       </div>
+    //     );
+    //   default:
+    //     return (
+    //       <div className="w-8 h-8 bg-tertiary rounded flex items-center justify-center">
+    //         <Wallet size={16} className="text-muted" />
+    //       </div>
+    //     );
+    // }
   };
 
   const totalBalance = stats.reduce((sum, exchange) => sum + exchange.balance[selectedCurrency], 0);
@@ -170,7 +175,7 @@ const BalancePage: React.FC = () => {
             {/* 交易所头部 */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
-                {getExchangeIcon(exchange.displayName)}
+                {getExchangeIcon(exchange.img_url)}
                 <div>
                   <h3 className="text-xl font-semibold text-primary">{exchange.displayName}</h3>
                   <p className="text-secondary text-sm">账户余额</p>
