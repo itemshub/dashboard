@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Badge, Button, Container } from '../components/ui';
 import { 
   mockExchanges, 
@@ -16,10 +16,36 @@ import {
   CheckCircle,
   Clock
 } from 'lucide-react';
+import { api_account_info } from '@/data/request';
 
 const BalancePage: React.FC = () => {
   const [selectedCurrency, setSelectedCurrency] = useState<'usd' | 'cny'>('usd');
 
+  const [stats, setStats] = useState<any[]>([]);
+  useEffect(() => {
+    loadPageData();
+  }, []);
+
+  const loadPageData = async ()=>
+  {
+    const datas = await api_account_info();
+    console.log("api_account_info",datas)
+    if(datas)
+    {
+      setStats(datas)
+    }
+  }
+
+  if (stats?.length ==0) {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-transparent">
+      <div
+        className="h-12 w-12 rounded-full border-4 border-white/20 border-t-white animate-spin"
+        aria-label="Loading"
+      />
+    </div>
+  );
+}
   const formatCurrency = (amount: number, currency: 'usd' | 'cny') => {
     if (currency === 'cny') {
       return `¥${amount.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -62,8 +88,8 @@ const BalancePage: React.FC = () => {
     }
   };
 
-  const totalBalance = mockExchanges.reduce((sum, exchange) => sum + exchange.balance[selectedCurrency], 0);
-  const totalWithdrawable = mockExchanges.reduce((sum, exchange) => sum + exchange.withdrawable[selectedCurrency], 0);
+  const totalBalance = stats.reduce((sum, exchange) => sum + exchange.balance[selectedCurrency], 0);
+  const totalWithdrawable = stats.reduce((sum, exchange) => sum + exchange.withdrawable[selectedCurrency], 0);
 
   return (
     <div className="space-y-6">
@@ -139,7 +165,7 @@ const BalancePage: React.FC = () => {
 
       {/* 交易所列表 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {mockExchanges.map((exchange) => (
+        {stats.map((exchange) => (
           <Card key={exchange.name} className="p-6">
             {/* 交易所头部 */}
             <div className="flex items-center justify-between mb-6">
@@ -226,7 +252,7 @@ const BalancePage: React.FC = () => {
         </div>
         
         <div className="space-y-4">
-          {mockExchanges.map((exchange) => {
+          {stats.map((exchange) => {
             const percentage = (exchange.balance[selectedCurrency] / totalBalance) * 100;
             return (
               <div key={exchange.name} className="flex items-center space-x-4">
@@ -254,7 +280,7 @@ const BalancePage: React.FC = () => {
       </Card>
 
       {/* 风险提示 */}
-      <Card className="p-6 bg-warning/5 border border-warning/20">
+      {/* <Card className="p-6 bg-warning/5 border border-warning/20">
         <div className="flex items-start space-x-3">
           <AlertTriangle size={24} className="text-warning mt-1 flex-shrink-0" />
           <div>
@@ -281,10 +307,10 @@ const BalancePage: React.FC = () => {
             </div>
           </div>
         </div>
-      </Card>
+      </Card> */}
 
       {/* 最近活动 */}
-      <Card className="p-6">
+      {/* <Card className="p-6">
         <h3 className="text-xl font-semibold text-primary mb-6">最近余额变动</h3>
         <div className="space-y-4">
           {[
@@ -329,7 +355,7 @@ const BalancePage: React.FC = () => {
             </div>
           ))}
         </div>
-      </Card>
+      </Card> */}
     </div>
   );
 };

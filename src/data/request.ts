@@ -199,3 +199,54 @@ export const api_login = async(username:String,password:String) =>
         return false;
     }
 }
+
+const colors = [
+  '#1b2838',
+  '#f4a261',
+  '#2a9d8f',
+  '#e76f51'
+]
+export const random_color = () => {
+  const idx = Math.floor(Math.random() * colors.length);
+  return colors[idx];
+};
+
+export const api_account_info = async() =>
+{
+    try{
+        const myHeaders = new Headers();
+        myHeaders.append("token", localStorage.getItem('cs-arbitrage-auth'));
+        const requestOptions = {
+            method: "GET",
+            headers: myHeaders,
+            redirect: "follow"
+        };
+
+        const res = await fetch(router.admin.info, (requestOptions as any))
+        const json = await res.json();
+        if(json &&json?.code == 200 && json?.data)
+        {
+            let ret = [];
+            for(let i of json.data)
+            {
+                ret.push(
+                    {
+                        name: i.name,
+                        market_id: i.market_id,
+                        displayName: i.name,
+                        balance: { usd: Number(i.balance?.raw), cny: Number(i.balance?.raw)*7 },
+                        withdrawable: { usd: Number(i.balance?.raw), cny: Number(i.balance?.raw)*7 },
+                        img_url:i.img_url,
+                        url: 'https://steamcommunity.com/market',
+                        color: random_color()
+                    }
+                )
+            }
+            return ret;
+        }
+    }catch(e)
+    {
+        console.error(e);
+        return false;
+    }
+}

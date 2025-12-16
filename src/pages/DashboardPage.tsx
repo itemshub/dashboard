@@ -23,7 +23,6 @@ const DashboardPage: React.FC = () => {
   const loadPageData = async ()=>
   {
     const datas = await dashboard_data();
-    console.log(datas)
     setStats(datas)
   }
   const formatCurrency = (value: number) => {

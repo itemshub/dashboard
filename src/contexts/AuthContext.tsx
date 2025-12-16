@@ -31,7 +31,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     // 检查本地存储中的登录状态
-    return localStorage.getItem('cs-arbitrage-auth') === 'true';
+    return localStorage.getItem('cs-arbitrage-auth')?.length > 10;
   });
 
   const login = async (username: string, password: string): Promise<boolean> => {

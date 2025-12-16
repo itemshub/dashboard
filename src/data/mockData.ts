@@ -489,7 +489,6 @@ const getExchangeDisplayName = (exchange: string): string => {
 };
 
 export const mockArbitrageOpportunities = calculateArbitrageOpportunities();
-
 // 交易所数据
 export const mockExchanges: Exchange[] = [
   {
