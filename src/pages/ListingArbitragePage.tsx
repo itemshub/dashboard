@@ -15,10 +15,12 @@ import {
 import { dashboard_data } from '@/data/request';
 
 const ListingArbitragePage: React.FC = () => {
-  const [minProfit, setMinProfit] = useState(0);
+  const [minProfit, setMinProfit] = useState(5);
   const [maxProfit, setMaxProfit] = useState(100);
   const [sortBy, setSortBy] = useState<'profit' | 'profitPercentage'>('profitPercentage');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [limitFrom, setLimitFrom] = useState("");
+  const [limitTo, setLimitTo] = useState("");
 
     const [skins, setSkins] = useState<any>({});
     const [markets, setMarkets] = useState<any>([]);
@@ -30,11 +32,10 @@ const ListingArbitragePage: React.FC = () => {
         }else{
           setFilteredOpportunities(setData(stats.raw.profitAble))
         }
-    }, [minProfit, maxProfit, sortBy, sortOrder]);
+    }, [minProfit, maxProfit, sortBy, sortOrder,limitFrom,limitTo]);
     const loadPageData = async ()=>
     {
         const datas = await dashboard_data();
-        console.log(datas)
         setSkins(datas.raw.skins)
         setMarkets(datas.raw.markets)
         setStats(datas)
@@ -50,6 +51,18 @@ const ListingArbitragePage: React.FC = () => {
           const meetsMax = opp.profitPercentage <= maxProfit;
           return meetsMin && meetsMax;
         })
+        .filter(opp => {
+          if(String(opp.buyExchange).toLowerCase().includes((limitFrom).toLowerCase()))
+          {
+            return opp;
+          }
+        })
+        .filter(opp => {
+          if(String(opp.sellExchange).toLowerCase().includes((limitTo).toLowerCase()))
+            {
+              return opp;
+            }
+          })
         .sort((a, b) => {
           const aValue = sortBy === 'profit' ? a.profit : a.profitPercentage;
           const bValue = sortBy === 'profit' ? b.profit : b.profitPercentage;
@@ -132,7 +145,7 @@ const ListingArbitragePage: React.FC = () => {
 
       {/* 过滤器 */}
       <Card className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 items-end">
           <div>
             <label className="text-secondary text-sm font-medium mb-2 block">
               最低利差 (%)
@@ -162,6 +175,39 @@ const ListingArbitragePage: React.FC = () => {
             />
             <div className="text-center text-primary font-medium mt-1">{maxProfit}%</div>
           </div>
+
+          <div>
+            <label className="text-secondary text-sm font-medium mb-2 block">
+              购买市场
+            </label>
+            <select
+              value={limitFrom}
+              onChange={(e) => setLimitFrom(e.target.value)}
+              className="neumorphic-input w-full px-4 py-3"
+            >
+              <option value="">无限制</option>
+              {markets.map((mk,index) => (
+              <option value={mk.market_id}>{mk.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-secondary text-sm font-medium mb-2 block">
+              卖出市场
+            </label>
+            <select
+              value={limitTo}
+              onChange={(e) => setLimitTo(e.target.value)}
+              className="neumorphic-input w-full px-4 py-3"
+            >
+              <option value="">无限制</option>
+              {markets.map((mk,index) => (
+              <option value={mk.market_id}>{mk.name}</option>
+              ))}
+            </select>
+          </div>
+
 
           <div>
             <label className="text-secondary text-sm font-medium mb-2 block">

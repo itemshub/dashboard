@@ -117,7 +117,7 @@ const LoginPage: React.FC = () => {
             {/* 提示信息 */}
             <div className="text-center">
               <div className="neumorphic-badge text-muted text-xs">
-                测试账号: admin / admin123
+                本平台已关闭测试账户 
               </div>
             </div>
           </form>

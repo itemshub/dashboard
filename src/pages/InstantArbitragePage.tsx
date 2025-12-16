@@ -17,10 +17,12 @@ import {
 import { dashboard_data } from '@/data/request';
 
 const InstantArbitragePage: React.FC = () => {
-  const [minProfit, setMinProfit] = useState(0);
+  const [minProfit, setMinProfit] = useState(5);
   const [maxProfit, setMaxProfit] = useState(100);
   const [sortBy, setSortBy] = useState<'profit' | 'profitPercentage'>('profitPercentage');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [limitFrom, setLimitFrom] = useState("");
+  const [limitTo, setLimitTo] = useState("");
 
   const [skins, setSkins] = useState<any>({});
   const [markets, setMarkets] = useState<any>([]);
@@ -32,7 +34,7 @@ const InstantArbitragePage: React.FC = () => {
       }else{
         setFilteredOpportunities(setData(stats.raw.profitAbleMaker))
       }
-  }, [minProfit, maxProfit, sortBy, sortOrder]);
+  }, [minProfit, maxProfit, sortBy, sortOrder,limitFrom,limitTo]);
   const loadPageData = async ()=>
   {
       const datas = await dashboard_data();
@@ -52,6 +54,18 @@ const InstantArbitragePage: React.FC = () => {
         const meetsMax = opp.profitPercentage <= maxProfit;
         return meetsMin && meetsMax;
       })
+      .filter(opp => {
+        if(String(opp.buyExchange).toLowerCase().includes((limitFrom).toLowerCase()))
+        {
+          return opp;
+        }
+      })
+      .filter(opp => {
+        if(String(opp.sellExchange).toLowerCase().includes((limitTo).toLowerCase()))
+          {
+            return opp;
+          }
+        })
       .sort((a, b) => {
         const aValue = sortBy === 'profit' ? a.profit : a.profitPercentage;
         const bValue = sortBy === 'profit' ? b.profit : b.profitPercentage;
@@ -133,7 +147,7 @@ const InstantArbitragePage: React.FC = () => {
 
       {/* 过滤器 */}
       <Card className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div className="grid grid-cols-4 md:grid-cols-6 gap-4 items-end">
           <div>
             <label className="text-secondary text-sm font-medium mb-2 block">
               最低利差 (%)
@@ -175,6 +189,37 @@ const InstantArbitragePage: React.FC = () => {
             >
               <option value="profitPercentage">按利差排序</option>
               <option value="profit">按利润排序</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-secondary text-sm font-medium mb-2 block">
+              购买市场
+            </label>
+            <select
+              value={limitFrom}
+              onChange={(e) => setLimitFrom(e.target.value)}
+              className="neumorphic-input w-full px-4 py-3"
+            >
+              <option value="">无限制</option>
+              {markets.map((mk,index) => (
+              <option value={mk.market_id}>{mk.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-secondary text-sm font-medium mb-2 block">
+              卖出市场
+            </label>
+            <select
+              value={limitTo}
+              onChange={(e) => setLimitTo(e.target.value)}
+              className="neumorphic-input w-full px-4 py-3"
+            >
+              <option value="">无限制</option>
+              {markets.map((mk,index) => (
+              <option value={mk.market_id}>{mk.name}</option>
+              ))}
             </select>
           </div>
 
