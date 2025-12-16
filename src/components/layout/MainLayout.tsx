@@ -20,7 +20,7 @@ const navItems = [
   { path: '/skins', label: '饰品列表', icon: <Shield size={20} /> },
   { path: '/listing-arbitrage', label: '挂单套利', icon: <TrendingUp size={20} /> },
   { path: '/instant-arbitrage', label: '吃单套利', icon: <Zap size={20} /> },
-  { path: '/my-arbitrage', label: '我的套利', icon: <User size={20} /> },
+  { path: '/my-arbitrage', label: '我的库存', icon: <User size={20} /> },
   { path: '/balance', label: '余额管理', icon: <Wallet size={20} /> },
 ];
 

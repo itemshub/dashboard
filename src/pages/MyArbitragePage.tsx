@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Table, TableHeader, TableBody, TableCell, Badge, Button, Container } from '../components/ui';
 import { 
   mockMyArbitrages, 
@@ -24,11 +24,40 @@ import {
   XCircle,
   AlertCircle
 } from 'lucide-react';
+import { api_account_info, api_account_inventory } from '@/data/request';
 
 type TabType = 'arbitrage' | 'inventory' | 'history';
 
 const MyArbitragePage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('arbitrage');
+  const [activeTab, setActiveTab] = useState<TabType>('inventory');
+
+  const [stats, setStats] = useState<any[]>([]);
+  const [inventory, setInventory] = useState<any[]>([]);
+    useEffect(() => {
+      loadPageData();
+    }, []);
+  
+    const loadPageData = async ()=>
+    {
+      const datas = await api_account_inventory();
+      console.log("api_account_inventory",datas)
+      if(datas)
+      {
+        setInventory(datas)
+      }
+    }
+  
+    if (inventory?.length ==0) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-transparent">
+        <div
+          className="h-12 w-12 rounded-full border-4 border-white/20 border-t-white animate-spin"
+          aria-label="Loading"
+        />
+      </div>
+    );
+  }
+
 
   const formatPrice = (price: number) => {
     return `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -86,8 +115,8 @@ const MyArbitragePage: React.FC = () => {
   };
 
   // 计算统计数据
-  const totalInventoryValue = mockInventory.reduce((sum, item) => sum + (item.currentValue * item.quantity), 0);
-  const totalProfit = mockInventory.reduce((sum, item) => sum + item.totalProfit, 0);
+  const totalInventoryValue = inventory.reduce((sum, item) => sum + (item.currentValue * item.quantity), 0);
+  const totalProfit = inventory.reduce((sum, item) => sum + item.totalProfit, 0);
   const activeArbitrages = mockMyArbitrages.filter(arb => arb.status === 'active').length;
   const completedArbitrages = mockMyArbitrages.filter(arb => arb.status === 'completed').length;
   const recentTrades = mockTradeHistory.filter(trade => trade.status === 'completed').slice(0, 5);
@@ -96,7 +125,7 @@ const MyArbitragePage: React.FC = () => {
     <div className="space-y-6">
       {/* 页面标题 */}
       <div className="animate-fade-in-up">
-        <h1 className="text-3xl font-bold text-primary mb-2">我的套利</h1>
+        <h1 className="text-3xl font-bold text-primary mb-2">库存管理</h1>
         <p className="text-secondary">管理您的库存、套利行为和交易历史</p>
       </div>
 
@@ -106,7 +135,7 @@ const MyArbitragePage: React.FC = () => {
           <div className="flex items-center justify-center mb-2">
             <Package size={24} className="text-accent" />
           </div>
-          <div className="text-2xl font-bold text-primary">{mockInventory.length}</div>
+          <div className="text-2xl font-bold text-primary">{inventory.length}</div>
           <div className="text-secondary text-sm">持有饰品</div>
           <div className="text-sm text-success mt-1">{formatPrice(totalInventoryValue)}</div>
         </Card>
@@ -134,7 +163,7 @@ const MyArbitragePage: React.FC = () => {
             <History size={24} className="text-warning" />
           </div>
           <div className="text-2xl font-bold text-primary">{mockTradeHistory.length}</div>
-          <div className="text-secondary text-sm">总交易次数</div>
+          <div className="text-secondary text-sm">持有武器箱</div>
           <div className="text-sm text-success mt-1">本月活跃</div>
         </Card>
       </div>
@@ -142,17 +171,7 @@ const MyArbitragePage: React.FC = () => {
       {/* 标签页导航 */}
       <Card className="p-2">
         <div className="flex space-x-2">
-          <button
-            onClick={() => setActiveTab('arbitrage')}
-            className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-neumorphic transition-all ${
-              activeTab === 'arbitrage' 
-                ? 'bg-accent text-white' 
-                : 'text-secondary hover:text-primary hover:bg-tertiary/30'
-            }`}
-          >
-            <User size={18} />
-            <span>我的套利</span>
-          </button>
+
           <button
             onClick={() => setActiveTab('inventory')}
             className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-neumorphic transition-all ${
@@ -174,6 +193,17 @@ const MyArbitragePage: React.FC = () => {
           >
             <History size={18} />
             <span>交易历史</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('arbitrage')}
+            className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-neumorphic transition-all ${
+              activeTab === 'arbitrage' 
+                ? 'bg-accent text-white' 
+                : 'text-secondary hover:text-primary hover:bg-tertiary/30'
+            }`}
+          >
+            <User size={18} />
+            <span>我的套利</span>
           </button>
         </div>
       </Card>
@@ -313,10 +343,10 @@ const MyArbitragePage: React.FC = () => {
               <h3 className="text-xl font-semibold text-primary">我的库存</h3>
               <div className="flex items-center space-x-4">
                 <div className="text-sm text-secondary">
-                  总价值: <span className="text-success font-bold">{formatPrice(totalInventoryValue)}</span>
+                  武器箱总价值: <span className="text-success font-bold">{formatPrice(totalInventoryValue)}</span>
                 </div>
                 <Badge variant="accent" size="md">
-                  {mockInventory.length} 件饰品
+                  {inventory.length} 件饰品
                 </Badge>
               </div>
             </div>
@@ -327,15 +357,15 @@ const MyArbitragePage: React.FC = () => {
               <TableHeader>
                 <TableCell className="font-semibold text-secondary">饰品信息</TableCell>
                 <TableCell className="font-semibold text-secondary">数量</TableCell>
-                <TableCell className="font-semibold text-secondary">平均成本</TableCell>
+                {/* <TableCell className="font-semibold text-secondary">平均成本</TableCell> */}
                 <TableCell className="font-semibold text-secondary">当前价值</TableCell>
                 <TableCell className="font-semibold text-secondary">总价值</TableCell>
-                <TableCell className="font-semibold text-secondary">总利润</TableCell>
-                <TableCell className="font-semibold text-secondary">交易所</TableCell>
+                {/* <TableCell className="font-semibold text-secondary">总利润</TableCell> */}
+                {/* <TableCell className="font-semibold text-secondary">交易所</TableCell> */}
                 <TableCell className="font-semibold text-secondary">操作</TableCell>
               </TableHeader>
               <TableBody>
-                {mockInventory.map((item) => (
+                {inventory.map((item) => (
                   <tr key={item.id} className="hover:bg-tertiary/20 transition-colors">
                     <TableCell>
                       <div className="flex items-center space-x-3">
@@ -363,11 +393,11 @@ const MyArbitragePage: React.FC = () => {
                       <div className="font-bold text-primary">{item.quantity}</div>
                     </TableCell>
                     
-                    <TableCell>
+                    {/* <TableCell>
                       <div className="text-secondary">
                         {formatPrice(item.avgBuyPrice)}
                       </div>
-                    </TableCell>
+                    </TableCell> */}
                     
                     <TableCell>
                       <div className="text-primary font-medium">
@@ -381,7 +411,7 @@ const MyArbitragePage: React.FC = () => {
                       </div>
                     </TableCell>
                     
-                    <TableCell>
+                    {/* <TableCell>
                       <div className={`font-bold ${
                         item.totalProfit >= 0 ? 'text-success' : 'text-error'
                       }`}>
@@ -391,13 +421,13 @@ const MyArbitragePage: React.FC = () => {
                     
                     <TableCell>
                       <div className="text-secondary">{item.exchange}</div>
-                    </TableCell>
+                    </TableCell> */}
                     
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button variant="primary" size="sm">
+                        {/* <Button variant="primary" size="sm">
                           出售
-                        </Button>
+                        </Button> */}
                         <Button variant="ghost" size="sm">
                           <ExternalLink size={14} />
                         </Button>

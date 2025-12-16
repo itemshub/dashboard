@@ -11,7 +11,8 @@ const router = {
     admin:{
         ping:base_url+"admin/ping",
         login:base_url+"admin/login",
-        info:base_url+"admin/info"
+        info:base_url+"admin/info",
+        inventory:base_url+"admin/inventory"
     }
 }
 export const dashboard_data =async () =>
@@ -244,6 +245,66 @@ export const api_account_info = async() =>
                 )
             }
             return ret;
+        }
+    }catch(e)
+    {
+        console.error(e);
+        return false;
+    }
+}
+
+export const api_account_inventory = async() =>
+{
+    try{
+        const myHeaders = new Headers();
+        myHeaders.append("token", localStorage.getItem('cs-arbitrage-auth'));
+        const requestOptions = {
+            method: "GET",
+            headers: myHeaders,
+            redirect: "follow"
+        };
+
+        const res = await fetch(router.admin.inventory, (requestOptions as any))
+        const json = await res.json();
+
+        const res_index = await fetch(router.index);
+        const json_index = await res_index.json();
+
+        const skins = json_index.data.skins;
+
+        if(json &&json?.code == 200 && json?.data && json.data?.length>0)
+        {
+            let ret = [];
+            for(let i of json.data)
+            {
+                let price = 0;
+                for(let u of skins)
+                {
+                    if(String(u.name).toLocaleLowerCase().includes(String(i.name).toLocaleLowerCase()))
+                    {
+                        price = u.price;
+                    }
+                }
+                ret.push(
+                    {
+                        "assetid": i.assetid,
+                        "classid": i.classid,
+                        "instanceid": i.instanceid,
+                        "name": i.name,
+                        id: i.assetid,
+                        skinId: i.classid,
+                        skinName: i.name,
+                        skinImage: i.icon_url,
+                        quantity: Number(i.amount),
+                        currentValue: price,
+                    }
+                )
+            }
+            return ret.sort((a, b) => {
+                const pa = Number(a.currentValue) || 0;
+                const pb = Number(b.currentValue) || 0;
+                return pb - pa;
+            });
         }
     }catch(e)
     {
