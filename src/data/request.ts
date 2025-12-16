@@ -9,6 +9,7 @@ const router = {
         markets:base_url+"amm/markets"
     },
     admin:{
+        ping:base_url+"admin/ping",
         login:base_url+"admin/login",
         info:base_url+"admin/info"
     }
@@ -243,6 +244,32 @@ export const api_account_info = async() =>
                 )
             }
             return ret;
+        }
+    }catch(e)
+    {
+        console.error(e);
+        return false;
+    }
+}
+
+
+export const api_admin_ping = async() =>
+{
+    try{
+        const myHeaders = new Headers();
+        myHeaders.append("token", localStorage.getItem('cs-arbitrage-auth'));
+        const requestOptions = {
+            method: "GET",
+            headers: myHeaders,
+            redirect: "follow"
+        };
+
+        const res = await fetch(router.admin.ping, (requestOptions as any))
+        const json = await res.json();
+        console.log("Admin ping : ",json)
+        if(json &&json?.code == 200)
+        {
+            return true;
         }
     }catch(e)
     {

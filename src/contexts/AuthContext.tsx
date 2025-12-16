@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { api_login } from '@/data/request';
+import { api_admin_ping, api_login } from '@/data/request';
 // 认证上下文
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -29,8 +29,19 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+    const token_checker = async() =>
+  {
+    const check = await api_admin_ping();
+    if(!check)
+    {
+      setIsAuthenticated(false);
+      localStorage.setItem('cs-arbitrage-auth',"")
+    }
+  }
+  
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     // 检查本地存储中的登录状态
+    token_checker()
     return localStorage.getItem('cs-arbitrage-auth')?.length > 10;
   });
 
