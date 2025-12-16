@@ -7,6 +7,10 @@ const router = {
     cases :base_url+"cases",
     amm:{
         markets:base_url+"amm/markets"
+    },
+    admin:{
+        login:base_url+"admin/login",
+        info:base_url+"admin/info"
     }
 }
 export const dashboard_data =async () =>
@@ -164,5 +168,34 @@ export const dashboard_data =async () =>
             profitablePairs10:"0",
             lastUpdate: '2025-12-09T15:30:00Z'
         };
+    }
+}
+
+export const api_login = async(username:String,password:String) =>
+{
+    try{
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        const raw = JSON.stringify({
+            "email": username,
+            "password": password
+        });
+        const requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: raw,
+            redirect: "follow"
+        };
+
+        const res = await fetch(router.admin.login, (requestOptions as any))
+        const json = await res.json();
+        if(json &&json?.code == 200 && json?.data)
+        {
+            return json.data;
+        }
+    }catch(e)
+    {
+        console.error(e);
+        return false;
     }
 }

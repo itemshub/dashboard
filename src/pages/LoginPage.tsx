@@ -19,17 +19,15 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
 
     // 模拟登录延迟
-    setTimeout(() => {
-      const success = login(username, password);
-      
-      if (success) {
-        navigate('/dashboard');
-      } else {
-        setError('用户名或密码错误，请重试');
-      }
-      
-      setIsLoading(false);
-    }, 1000);
+    const success = await login(username, password);
+    
+    if (success) {
+      navigate('/dashboard');
+    } else {
+      setError('用户名或密码错误，请重试');
+    }
+    
+    setIsLoading(false);
   };
 
   return (
