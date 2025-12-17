@@ -32,7 +32,7 @@ const BalancePage: React.FC = () => {
     console.log("api_account_info",datas)
     if(datas)
     {
-      setStats(datas)
+      setStats(datas.filter((d : any)=>{if(d?.name){return d}}))
     }
   }
 

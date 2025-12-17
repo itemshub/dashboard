@@ -231,18 +231,21 @@ export const api_account_info = async() =>
             let ret = [];
             for(let i of json.data)
             {
-                ret.push(
-                    {
-                        name: i.name,
-                        market_id: i.market_id,
-                        displayName: i.name,
-                        balance: { usd: Number(i.balance?.raw), cny: Number(i.balance?.raw)*7 },
-                        withdrawable: { usd: Number(i.balance?.raw), cny: Number(i.balance?.raw)*7 },
-                        img_url:i.img_url,
-                        url: 'https://steamcommunity.com/market',
-                        color: random_color()
-                    }
-                )
+                if(i && i?.name)
+                {
+                    ret.push(
+                        {
+                            name: i.name,
+                            market_id: i.market_id,
+                            displayName: i.name,
+                            balance: { usd: Number(i.balance?.raw), cny: Number(i.balance?.raw)*7 },
+                            withdrawable: { usd: Number(i.balance?.raw), cny: Number(i.balance?.raw)*7 },
+                            img_url:i.img_url,
+                            url: 'https://steamcommunity.com/market',
+                            color: random_color()
+                        }
+                    )
+                }
             }
             return ret;
         }
