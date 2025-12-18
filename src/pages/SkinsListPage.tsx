@@ -53,7 +53,7 @@ const SkinsListPage: React.FC = () => {
   const setData = (skins:any) =>
   {
     let filtered = skins.filter(skin => {
-      const matchesSearch = skin.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch = skin.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            skin.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesRarity = filterRarity === 'all' || skin.rarity === filterRarity;
       return matchesSearch && matchesRarity;

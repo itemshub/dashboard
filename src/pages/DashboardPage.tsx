@@ -186,13 +186,13 @@ if (!stats?.lastUpdate) {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center p-6 bg-tertiary/20 rounded-neumorphic">
-            <div className="text-3xl font-bold text-primary mb-2">20</div>
+            <div className="text-3xl font-bold text-primary mb-2">{stats.raw.skins.length}</div>
             <div className="text-secondary mb-1">监控饰品总数</div>
             <div className="text-muted text-sm">覆盖主流CS游戏武器皮肤</div>
           </div>
           
           <div className="text-center p-6 bg-tertiary/20 rounded-neumorphic">
-            <div className="text-3xl font-bold text-primary mb-2">4</div>
+            <div className="text-3xl font-bold text-primary mb-2">{stats.raw.markets.length}</div>
             <div className="text-secondary mb-1">交易所数量</div>
             <div className="text-muted text-sm">Steam, CS.MONEY, BUFF163, C5Game</div>
           </div>

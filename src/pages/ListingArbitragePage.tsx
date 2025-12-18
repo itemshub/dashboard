@@ -15,7 +15,7 @@ import {
 import { dashboard_data } from '@/data/request';
 
 const ListingArbitragePage: React.FC = () => {
-  const [minProfit, setMinProfit] = useState(5);
+  const [minProfit, setMinProfit] = useState(15);
   const [maxProfit, setMaxProfit] = useState(100);
   const [sortBy, setSortBy] = useState<'profit' | 'profitPercentage'>('profitPercentage');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -27,6 +27,7 @@ const ListingArbitragePage: React.FC = () => {
     const [stats, setStats] = useState<any>({});
     const [filteredOpportunities , setFilteredOpportunities]= useState<any>([]);
     useEffect(() => {
+      console.log("Load data ")
         if (!stats?.lastUpdate) {
           loadPageData();
         }else{
